@@ -1,0 +1,74 @@
+@import "{poetic:materialize-scss}/sass/components/_color.scss";
+
+// Change any SASS variables here
+$primary-color: #111111;
+$secondary-color: rgba(204,0,0,1) !default;
+// Dropdown variables for headerSearch and Top-right ShadowMan
+$dropdown-bg-color: #111111 !default;
+$dropdown-hover-bg-color: rgba(255,255,255,0.2) !default;
+$dropdown-color: #fff !default;
+
+// import main scss file
+@import "{poetic:materialize-scss}/sass/materialize.scss";
+
+//Place normal CSS below here. Most attributes need !important
+.WBDarkGreyBackground{
+    background: #111111 !important;
+}
+.WBDarkGrey{
+    color: #111111 !important;
+}
+.WBRedBackground{
+    background: #CC0000 !important;
+}
+.WBRed{
+    color: #CC0000 !important;
+}
+
+.headerSearch {
+    background: rgba(255,255,255,0.2) !important;
+    color: rgba(255,255,255,1) !important;
+    padding: 0 0 0 15px !important;
+    height: 2rem !important;
+    border-bottom: none !important;
+}
+
+
+html, body {
+    background-image: url("images/background_workbench.jpg");
+    background-size: 100% auto;
+    min-width: 400px;
+    height: 100vh !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+#header {
+    margin: 0;
+    height: 15% !important;
+}
+header{
+    padding: 2vh !important;
+}
+#main {
+    min-height: 77% !important;
+}
+main {
+    width: 90% !important;
+}
+
+#footer{
+    max-height: 8% !important;
+    background: #111111 !important;
+}
+
+footer{
+    height: 8vh !important;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+/*Beta Logo */
+.beta {
+    padding-top: 17px;
+    margin-left: 6px;
+}
