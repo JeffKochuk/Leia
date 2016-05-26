@@ -8,7 +8,8 @@ export default class Search extends React.Component {
       {text: 'Sherlock - Investigate an Eloqua contact', link: 'https://sherlock-marketing.itos.redhat.com/email'},
       {text: 'Sherlock - Decode Path Codes', link: 'https://sherlock-marketing.itos.redhat.com/codes'},
       {text: 'Columbo - Filter a List of Contacts through Eloqua', link: 'https://columbo-marketing.itos.redhat.com'},
-      {text: 'Workflows - You Can\'t Comprehend TRUE BEAUTY until You\'ve Used Workflows', link: 'https://labs-marketing.itos.redhat.com/workflows.html'}
+      {text: 'Workflows - Marketing Service Portal', link: 'https://labs-marketing.itos.redhat.com/workflows.html'},
+      {text: 'Workbench - Automated Marketing Tools Dashboard', link: 'https://workbench-marketing.itos.redhat.com'}
     ];
     this.state = { results: [] };
     this.handleChange = this.handleChange.bind(this);
