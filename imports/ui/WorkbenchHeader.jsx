@@ -20,7 +20,7 @@ export default function WorkbenchHeader() {
             <li className="divider"></li>
             <li><a href="http://workflows-marketing.itos.redhat.com">Workflows</a></li>
             <li><a href="http://workflows-marketing.itos.redhat.com">Feedback</a></li>
-            <li><a href="http://workbench-marketing.itos.redhat.com">Reports</a></li>
+            <li><a href="http://workbench-marketing.itos.redhat.com/changelog.html">Change Log</a></li>
           </ul>
         </div>
       </div>
