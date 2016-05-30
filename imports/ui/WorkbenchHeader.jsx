@@ -18,9 +18,11 @@ export default function WorkbenchHeader() {
             <li><a href="http://sherlock-marketing.itos.redhat.com">Sherlock</a></li>
             <li><a href="http://columbo-marketing.itos.redhat.com">Columbo</a></li>
             <li className="divider"></li>
+            <li><a href="http://workbench-marketing.itos.redhat.com/feedback">Feedback</a></li>
+            <li><a href="http://workbench-marketing.itos.redhat.com/changelog">Change Log</a></li>
+            <li><a href="http://workbench-marketing.itos.redhat.com/reports">Reports</a></li>
+            <li className="divider"></li>
             <li><a href="http://workflows-marketing.itos.redhat.com">Workflows</a></li>
-            <li><a href="http://workflows-marketing.itos.redhat.com">Feedback</a></li>
-            <li><a href="http://workbench-marketing.itos.redhat.com/changelog.html">Change Log</a></li>
           </ul>
         </div>
       </div>
