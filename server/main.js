@@ -1,87 +1,183 @@
 import { Meteor } from 'meteor/meteor';
-import { getEloquaData, getEloquaDataPromise, SEGMENTS_URL, CONTACTS_URL } from '../imports/helpers/getEloquaData';
-import { Segments, Contacts } from '../imports/collections.js';
-
+import { getEloquaDataPromise, getEloquaDataResults, SEGMENTS_URL, CONTACTS_URL } from './getEloquaData.js';
+import { Segments, EloquaLogs, Logs } from '../imports/collections.js';
+import { Restivus } from 'meteor/nimble:restivus';
 
 // Take an Eloqua response and insert the elements into the Segments collection
-const insertSegments = (err, res, body) => {
+// Use with getEloquaResponse
+const insertSegments = Meteor.bindEnvironment( (body) => {
   for (const obj of body.elements) {
-    Segments.insert({ _id: obj.id, name: obj.name });
-    // console.log(`inserted Segment: ${obj}`);
+    Segments.upsert({ _id: obj.id }, { $set: { _id: obj.id, name: obj.name } });
   }
-};
+});
 
-const insertSegmentsPromise = (body) => {
-  for (const obj of body.elements) {
-    Segments.insert({ _id: obj.id, name: obj.name });
-    // console.log(`inserted Segment: ${obj}`);
-  }
-};
 
-const insertContactsPromise = (segmentID, body) => {
-  console.log(body.total);
-  for (const obj of body.elements) {
-    Contacts.insert({
-//Can't do ID on contact ID because the same contact can be in multiple segments and we need a separate
-      first: obj.C_FirstName,
-      last: obj.C_LastName,
-      email: obj.C_EmailAddress.replace(/.*@/, '***@'),
-      segment: segmentID,
-    });
-  }
-};
+// Called Daily to upsert new segment IDs
+export const updateSegmentList = Meteor.bindEnvironment( () => {
+  getEloquaDataPromise(SEGMENTS_URL, insertSegments).await();
+});
 
-// Take an Eloqua response and insert the elements into the Contacts collection
-const insertContacts = (segmentID, err, res, body) => {
-  for (const obj of body.elements) {
-    Contacts.insert({
-//Can't do ID on contact ID because the same contact can be in multiple segments and we need a separate
-      first: obj.C_FirstName,
-      last: obj.C_LastName,
-      email: obj.C_EmailAddress.replace(/.*@/, '***@'),
-      segment: segmentID,
-    });
-  }
-};
-
-const updateSegmentList = () => {
-  getEloquaData(SEGMENTS_URL,
-    Meteor.bindEnvironment(insertSegments),
-    Meteor.bindEnvironment(() => console.log(Segments.find().count())));
-};
-
-// Real Functionality starts here
-Meteor.startup(() => {   // code to run on server at startup
+///////////////
+//
+// Meteor Startup code
+//
+///////////////
+Meteor.startup(() => {
   if (Segments.find().count() === 0) { // Populate the server with data if it is currently empty.
     console.log('Populating Segments');
     Segments._ensureIndex({ name: 1 });
     updateSegmentList();
-     // @TODO Maybe Populate Contacts for the 1000 most recent lists
-    Contacts._ensureIndex({ segment: 1 });
+
   }
   const updateSegmentsEveryMorning = new Cron(updateSegmentList, { minute: 0, hour: 1 });
-  // @TODO start a cron job to refresh segments
 });
 
-Meteor.publish('contacts', (segmentID) => Contacts.find({ segment: segmentID }));
-Meteor.publish('segments', () => Segments.find());
-
+////////////////
+//
+// Meteor.Methods here
+//
+////////////////
 Meteor.methods({
-  // Search for a set of contacts given a segment's ID
-  // returns a promise
-  // Use .done() on the returned promise to deal with the asyncness
-  updateContacts: segmentID => {
-    Segments.update({ _id: segmentID }, { $set: { lastSearched: new Date() } });
-    const eloquaReturn = getEloquaDataPromise(CONTACTS_URL + segmentID, Meteor.bindEnvironment(insertContactsPromise.bind(undefined, segmentID))); // Search returned event? Publish?
-    console.log(eloquaReturn);
-    if (eloquaReturn === 0) {
-      console.log('This Segment is Empty???');
+  // Given a segment name,
+  // See if we have it in the record.
+  // If we do have it,
+  // See if we have updated it in the last day.
+  // If we have, return the cached copy from Contacts
+  // Otherwise, get the data from Eloqua and return that
+  getContactsOfSegmentByName: name => {
+    const cursor = Segments.find({ name });
+    if (cursor.count() === 0) {
+      throw new Meteor.Error(`Could Not Find Segment Name: ${name}`);
     }
-    return eloquaReturn;
-  },
-  getSegmentByName: name => {
-    console.log(name);
-    console.log(Segments.find({ name }).fetch()[0]);
-    return Segments.find({ name }).fetch()[0];
+    const segment = cursor.fetch()[0];
+    if (segment.lastSearched && new Date() - segment.lastSearched < 1000*60*60*24){
+      console.log(`Segment ${name} was searched within a day: ${segment.lastSearched}`);
+      if(segment.cache){
+        return segment.cache;
+      } else {
+        console.log('Last Searched was here but segment Cache was undefined');
+      }
+    }
+    
+    const results = getEloquaDataResults(`${CONTACTS_URL}/${segment._id}`)
+      .catch((err) => console.log("You probably forgot to add the AUTHORIZATION environment variable or gave a bad URL:::\n" + err))
+      .await();
+    Logs.insert({
+      type: 'Lookup',
+      input: name,
+      records: results.length,
+      date: new Date()
+    });
+    const retArray = results.map(obj => ({
+      first: obj.C_FirstName,
+      last: obj.C_LastName,
+      email: obj.C_EmailAddress.replace(/.*@/, '***@'),
+    }));
+
+    Segments.update({ _id: segment._id },
+      { $set:
+        { lastSearched: new Date(),
+          cache: retArray
+        }
+      });
+    return retArray;
   },
 });
+
+
+/////////////
+//
+// Rest API starts here
+//
+/////////////
+const RESTAPI = new Restivus({
+  apiPath: 'ws',
+  defaultHeaders: {
+    'Content-Type': 'application/json'
+  },
+  prettyJson: true,
+});
+
+// ADMIN UTILITY to refresh data
+//https://...com/ws/refresh
+// Use Eloqua Credentials in header
+RESTAPI.addRoute('refresh',{
+  post: function () {
+    if (this.request.headers.authorization === process.env.AUTHORIZATION){
+      console.log('Well Authorized, good sirs! Refreshing Data!');
+      updateSegmentList();
+      return {
+        statusCode: 200,
+        body: 'Success!'
+      };
+    } else{
+      console.log('/ws/refresh was activated but the authorization was incorrect');
+      console.log(this.request.headers.authorization);
+      console.log(process.env.AUTHORIZATION);
+      return { statusCode: 401 };
+    }
+  }
+});
+
+//http:/...com/ws/eloquaCallsInLastNDays/:days
+RESTAPI.addRoute('eloquaCallsInLastNDays/:days',{
+  get: function () {
+    let startDate = new Date();// Current Date
+    const days = this.urlParams.days;
+    startDate.setDate(startDate.getDate() - days); // Subtract N Days
+    startDate.setHours(0);  // Set the hour, minute and second components to 0
+    startDate.setMinutes(0);
+    startDate.setSeconds(0);
+    const count = EloquaLogs.find({ date: {$gte: startDate } }).map((doc) => Math.ceil(doc.numPagesToGet)).reduce((a, b) => a + b, 0);
+    return { days, count };
+  }
+});
+
+// http://...com/ws/PathCodes
+// http://...com/ws/PathCodes/:id
+RESTAPI.addCollection(Segments, {
+  excludedEndpoints: ['post', 'put', 'delete'],
+});
+
+RESTAPI.addCollection(EloquaLogs, {
+  excludedEndpoints: ['post', 'put', 'delete'],
+});
+
+// Get a report of contacts looked up
+RESTAPI.addRoute('usageReport', {
+  get: function () {
+    const oneDay = new Date();// Current Date
+    oneDay.setDate(oneDay.getDate() - 1); // Subtract N Days
+    const sevenDays = new Date();// Current Date
+    sevenDays.setDate(sevenDays.getDate() - 7); // Subtract N Days
+    const fourteenDays = new Date();// Current Date
+    fourteenDays.setDate(fourteenDays.getDate() - 14); // Subtract N Days
+    const thirtyDays = new Date();// Current Date
+    thirtyDays.setDate(thirtyDays.getDate() - 30); // Subtract N Days
+    const threeSixtyFiveDays = new Date();// Current Date
+    threeSixtyFiveDays.setDate(thirtyDays.getDate() - 365); // Subtract N Days
+    const REDUCE_SUM = (a, b) => a + b;
+    const lastDay = Logs.find({type: {$ne: 'Eloqua'},date: {$gte: oneDay } });
+    const lastWeek = Logs.find({type: {$ne: 'Eloqua'},date: {$gte: sevenDays } });
+    const lastTwoWeeks = Logs.find({type: {$ne: 'Eloqua'},date: {$gte: fourteenDays } });
+    const lastMonth = Logs.find({type: {$ne: 'Eloqua'},date: {$gte: thirtyDays } });
+    const lastYear = Logs.find({type: {$ne: 'Eloqua'},date: {$gte: threeSixtyFiveDays } });
+    return {
+      contactsFound: {
+        lastDay: lastDay.map((doc) => doc.records).reduce(REDUCE_SUM, 0),
+        lastWeek: lastWeek.map((doc) => doc.records).reduce(REDUCE_SUM, 0),
+        lastTwoWeeks: lastTwoWeeks.map((doc) => doc.records).reduce(REDUCE_SUM, 0),
+        lastMonth: lastMonth.map((doc) => doc.records).reduce(REDUCE_SUM, 0),
+        lastYear: lastYear.map((doc) => doc.records).reduce(REDUCE_SUM, 0)
+      },
+      uses: {
+        lastDay: lastDay.count(),
+        lastWeek: lastWeek.count(),
+        lastTwoWeeks: lastTwoWeeks.count(),
+        lastMonth: lastMonth.count(),
+        lastYear: lastYear.count()
+      }
+    }
+  }
+});
+

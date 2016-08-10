@@ -1,0 +1,108 @@
+/* CSS declarations go here */
+@import "{poetic:materialize-scss}/sass/components/_color.scss";
+@import url("http://overpass-30e2.kxcdn.com/overpass.css");
+// Change any SASS variables here
+$primary-color: #111111;
+$secondary-color: rgba(204,0,0,1) !default;
+// Dropdown variables for headerSearch and Top-right ShadowMan
+$dropdown-bg-color: #111111 !default;
+$dropdown-hover-bg-color: rgba(255,255,255,0.2) !default;
+$dropdown-color: #fff !default;
+
+// import main scss file
+@import "{poetic:materialize-scss}/sass/materialize.scss";
+
+//Place normal CSS below here. Most attributes need !important
+.WBDarkGreyBackground{
+    background: #111111 !important;
+}
+.WBDarkGrey{
+    color: #111111 !important;
+}
+.WBRedBackground{
+    background: #CC0000 !important;
+}
+.WBRed{
+    color: #CC0000 !important;
+}
+
+.headerSearch {
+    background: rgba(255,255,255,0.2) !important;
+    color: rgba(255,255,255,1) !important;
+    padding: 0 0 0 15px !important;
+    height: 2rem !important;
+    border-bottom: none !important;
+}
+
+.makeHeaderSearchWider {
+    margin-right: -5vw;
+}
+
+
+html, body {
+    background-image: url("images/background_workbench.jpg");
+    background-size: 100% auto;
+    min-width: 400px;
+    height: 100vh !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-family: "Overpass", sans-serif !important;
+}
+#header {
+    max-height: 12vh !important;
+    margin: 0 !important;
+}
+header{
+    margin: 0;
+    padding: 2vh !important;
+}
+
+#main {
+    height: 77vh !important;
+    margin: 0 auto !important;
+    width: 90% !important;
+}
+
+#footer{
+    max-height: 8vh !important;
+    background: #111111 !important;
+    margin: 0 !important;
+}
+footer{
+    height: 8vh;
+    padding: 0 !important;
+    margin: 0 !important;
+}
+
+h3 {
+    font-size: 3em;
+}
+
+h4 {
+    font-size: 2em;
+}
+p {
+    font-size: 1em;
+}
+
+
+.sandwich {
+    padding-top: 22px;
+}
+
+
+.beta {
+    margin-left: 25px;
+    padding-bottom: 3px;
+}
+
+/* Table Settings */
+table {
+    margin: 0 auto !important;
+}
+.tableDiv {
+    max-height: calc(95vh - 250px) !important;
+    min-height: 100px !important;
+    overflow: auto !important;
+}
