@@ -53,6 +53,12 @@ Meteor.methods({
     if (segment.lastSearched && new Date() - segment.lastSearched < 1000*60*60*24){
       console.log(`Segment ${name} was searched within a day: ${segment.lastSearched}`);
       if(segment.cache){
+        Logs.insert({
+          type: 'Lookup',
+          input: name,
+          records: segment.cache.length,
+          date: new Date()
+        });
         return segment.cache;
       } else {
         console.log('Last Searched was here but segment Cache was undefined');
@@ -157,11 +163,11 @@ RESTAPI.addRoute('usageReport', {
     const threeSixtyFiveDays = new Date();// Current Date
     threeSixtyFiveDays.setDate(thirtyDays.getDate() - 365); // Subtract N Days
     const REDUCE_SUM = (a, b) => a + b;
-    const lastDay = Logs.find({type: {$ne: 'Eloqua'},date: {$gte: oneDay } });
-    const lastWeek = Logs.find({type: {$ne: 'Eloqua'},date: {$gte: sevenDays } });
-    const lastTwoWeeks = Logs.find({type: {$ne: 'Eloqua'},date: {$gte: fourteenDays } });
-    const lastMonth = Logs.find({type: {$ne: 'Eloqua'},date: {$gte: thirtyDays } });
-    const lastYear = Logs.find({type: {$ne: 'Eloqua'},date: {$gte: threeSixtyFiveDays } });
+    const lastDay = Logs.find({type: 'Lookup',date: {$gte: oneDay } });
+    const lastWeek = Logs.find({type: 'Lookup',date: {$gte: sevenDays } });
+    const lastTwoWeeks = Logs.find({type: 'Lookup',date: {$gte: fourteenDays } });
+    const lastMonth = Logs.find({type: 'Lookup',date: {$gte: thirtyDays } });
+    const lastYear = Logs.find({type: 'Lookup',date: {$gte: threeSixtyFiveDays } });
     return {
       contactsFound: {
         lastDay: lastDay.map((doc) => doc.records).reduce(REDUCE_SUM, 0),
