@@ -106,3 +106,66 @@ table {
     min-height: 100px !important;
     overflow: auto !important;
 }
+
+/* holds a bunch of cards */
+.stats-container {
+    align-items: flex-start;
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-around;
+}
+
+.card-container {
+    max-height: 35vh;
+    min-width: 25vw;
+    overflow: scroll;
+}
+
+.tiny-button-inactive {
+    margin-top: 1rem;
+    padding: 0 0.3rem;
+    color: #C00;
+    background-color: #FFF;
+    border: 1px solid;
+    border-radius: 1rem;
+}
+
+.tiny-button-active {
+    margin-top: 1rem;
+    padding: 0 0.3rem;
+    color: #FFF;
+    background-color: #C00;
+    border: 1px solid;
+    border-radius: 1rem;
+}
+button:focus {
+    background-color: inherit !important;
+}
+
+.Chart {
+    padding: 5px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    height: 100%;
+}
+.barHolder {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+}
+.barHolder span {
+    width: 3rem;
+}
+.barHolder div {
+    background-color: #C00;
+    color: #FFF;
+    margin: 1px;
+    padding: 3px;
+}
+
+#MapHolder {
+    position: relative;
+    width: 400px;
+    height: 300px;
+}
