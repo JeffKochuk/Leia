@@ -43,7 +43,7 @@ export default class App extends Component {
           loading: false
         });
         if(err){
-          console.log('ERROR: ' + err.error)
+          console.log('ERROR: ' + err.error);
           Bert.alert(err.error, 'danger', 'growl-top-right');
         } else {
           console.log(result);

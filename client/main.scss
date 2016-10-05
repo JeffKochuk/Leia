@@ -40,7 +40,7 @@ $dropdown-color: #fff !default;
 
 
 html, body {
-    background-image: url("images/background_workbench.jpg");
+    background: url("images/background_workbench_fade.jpg") no-repeat, #111;
     background-size: 100% auto;
     min-width: 400px;
     height: 100vh !important;
@@ -107,6 +107,7 @@ table {
     overflow: auto !important;
 }
 
+<<<<<<< HEAD
 /* holds a bunch of cards */
 .stats-container {
     align-items: flex-start;
@@ -168,4 +169,14 @@ button:focus {
     position: relative;
     width: 400px;
     height: 300px;
+}
+
+// Change the text color from Grey to White when a label's checkbox is checked
+[type="checkbox"]:checked + label {
+    color: white;
+}
+
+// Make the select dropdown's carat red
+.caret {
+    color: #C00 !important;
 }
