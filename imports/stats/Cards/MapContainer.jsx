@@ -268,15 +268,12 @@ export default class MapContainer extends React.Component {
             '7': '#600'
         };
         const data = {};
-        console.log("MAP PROPS", this.props, Object.values(this.props));
         const max = Math.max(...Object.values(this.props));
         const stepSize = Math.ceil(max / 7);
-        console.log(max, stepSize);
         Object.keys(this.props).forEach((key) => {
             const threeLetterKey = twoLetterMap[key];
             const numberOfThings = this.props[key];
             const fillKey = `${Math.ceil(numberOfThings / stepSize)}`;
-            console.log(key, threeLetterKey, numberOfThings, fillKey);
             data[threeLetterKey] = {fillKey, numberOfThings};
         });
 
@@ -305,11 +302,11 @@ export default class MapContainer extends React.Component {
 
     render() {
         return (
-            <div className="col m8 s12 white" style={{'borderRadius': '2px'}}>
+            <div className="col s8" style={{'borderRadius': '2px'}}>
                 <div className="card-content center-align">
                     <span className="card-title">Country</span>
                 </div>
-                <div id="MapContainer" style={{ height: '60vh'}}></div>
+                <div id="MapContainer" style={{ height: '30vh', width: '100%'}}></div>
             </div>)
     }
 }

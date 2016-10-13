@@ -1,6 +1,7 @@
 import mysql from 'mysql';
 import promisify  from 'es6-promisify';
 
+
 var getConnection = () => {
     let connection = mysql.createConnection({
         host     : '57cde97f5110e22ff00009e3-marketing.itos.redhat.com',
@@ -13,6 +14,5 @@ var getConnection = () => {
     return connection;
 };
 
-const queryDB = promisify(connection.query, connection);
 
-export { getConnection, queryDB } ;
+export { getConnection } ;

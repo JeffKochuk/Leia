@@ -3,14 +3,18 @@
  */
 import React from 'react';
 
+const reduceSum = (a,b) => a + b;
 const compressData = (data) => {
     const sortedKeys = Object.keys(data)
-        .filter((str) => str !== 'null' && str !== 'Other')
+        .filter((str) => str !== 'null' && str !== 'Other' && str !== 'N/A')
         .sort((a,b) => data[b] - data[a] );
-    const thirdHighestValue =  data[sortedKeys[Math.min(sortedKeys.length, 2)]];
-    console.log(data, sortedKeys, thirdHighestValue);
-    const smallerList = Object.keys(data).filter((item) => data[item] >= thirdHighestValue);
-    let delta = Object.keys(data).length - smallerList.length;
+    //Take out items with a lower count than the third highest number.
+    const smallerList = sortedKeys.slice(0,3);
+    // Calculate the sum of the removed values so we can mark them as 'Other'
+    const total = Object.values(data).reduce(reduceSum);
+    const reducedTotal = smallerList.map(a => data[a]).reduce(reduceSum);
+    // delta is the number of removed entries for compressed data
+    let delta = total - reducedTotal;
     const compressedObj = {};
     smallerList.forEach((key) => {
         if (key === null || key === 'null') {
@@ -27,7 +31,6 @@ const compressData = (data) => {
     // If We didn't remove anything, there is no compressed data to save.
     return null;
 };
-
 const getPercentData = (data) => {
     const total = Object.values(data).reduce((a,b) => a + b, 0);
     const percentData = {};
@@ -78,25 +81,23 @@ export default class StatCard extends React.Component {
             <div className="col s12 m4">
                 <div className="card-content center-align">
                     <span className="card-title">{this.props.name}</span>
-                    <div className="card-container">
-                        <table className="bordered">
-                            <tbody>
-                            { Object.keys(activeData)
-                                .sort((a, b) => {
-                                    if (a == 'Other' || a === null || a === 'null') return 1;
-                                    if (b == 'Other' || b === null || b === 'null') return -1;
-                                    return parseInt(activeData[b]) - parseInt(activeData[a]);
-                                })
-                                .map((entry, idx) => (
-                                    <tr key={idx}>
-                                        <td>{entry}</td>
-                                        <td className="left-align">{activeData[entry]}</td>
-                                    </tr>)
-                                )
-                            }
-                            </tbody>
-                        </table>
-                    </div>
+                    <table className="bordered">
+                        <tbody>
+                        { Object.keys(activeData)
+                            .sort((a, b) => {
+                                if (a == 'Other' || a === null || a === 'null') return 1;
+                                if (b == 'Other' || b === null || b === 'null') return -1;
+                                return parseInt(activeData[b]) - parseInt(activeData[a]);
+                            })
+                            .map((entry, idx) => (
+                                <tr key={idx}>
+                                    <td>{entry}</td>
+                                    <td className="left-align">{activeData[entry]}</td>
+                                </tr>)
+                            )
+                        }
+                        </tbody>
+                    </table>
                     <div className="divider"></div>
                     <div className="WBRed row card-bottom">
                         <div className="col s2 offset-s4 center-align">

@@ -4,11 +4,11 @@ import StatCard from './FixedWidthStatCard.jsx';
 
 
 export default function MapStats(props) {
-    console.log('MAPSTATS', props);
+    console.log('MAPS PART HERE');
     return (
-        <div style={{'border-radius': '3px'}}>
+        <div>
             <MapContainer {...props['Country']} />
-            <StatCard name={'Language'} data={props['Language']} />
+            <StatCard name='Language' data={props['Language']} />
         </div>
     )
 }

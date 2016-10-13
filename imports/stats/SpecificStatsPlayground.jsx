@@ -20,14 +20,15 @@ export default class StatsPlayground extends React.Component {
     }
 
     getStatPlayground() {
-        console.log(this.state.selected);
-        if ( !this.props['Lead Rating']) return null;
+        console.log('State 2:', this.state.selected);
+        if ( !this.props['Country']) return null;
         if (this.state.selected === 0) {
             console.log('RankStats');
             return (<RankStats rating={this.props['Lead Rating']} ranking={this.props['Lead Ranking']}/>);
         } else if (this.state.selected === 1) {
             return null //<PeopleStats />
         } else if (this.state.selected === 2) {
+            console.log('Getting 2');
             return  <MapStats Country={this.props.Country} Language={this.props.Language} />
         } else if (this.state.selected === 3) {
             return null //<DataSample />
@@ -37,8 +38,9 @@ export default class StatsPlayground extends React.Component {
 
 
     render() {
+        console.log('SSP', this.props);
         return (
-            <div className="card row" style={{'borderRadius': '2px'}}>
+            <div className="card row black-text" style={{'borderRadius': '2px'}}>
                 {this.getStatPlayground()}
 
             </div>

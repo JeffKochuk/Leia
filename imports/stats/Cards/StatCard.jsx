@@ -3,14 +3,18 @@
  */
 import React from 'react';
 
+const reduceSum = (a,b) => a + b;
 const compressData = (data) => {
     const sortedKeys = Object.keys(data)
-        .filter((str) => str !== 'null' && str !== 'Other')
+        .filter((str) => str !== 'null' && str !== 'Other' && str !== 'N/A')
         .sort((a,b) => data[b] - data[a] );
-    const thirdHighestValue =  data[sortedKeys[Math.min(sortedKeys.length, 2)]];
-    console.log(data, sortedKeys, thirdHighestValue);
-    const smallerList = Object.keys(data).filter((item) => data[item] >= thirdHighestValue);
-    let delta = Object.keys(data).length - smallerList.length;
+    //Take out items with a lower count than the third highest number.
+    const smallerList = sortedKeys.slice(0,3);
+    // Calculate the sum of the removed values so we can mark them as 'Other'
+    const total = Object.values(data).reduce(reduceSum);
+    const reducedTotal = smallerList.map(a => data[a]).reduce(reduceSum);
+    // delta is the number of removed entries for compressed data
+    let delta = total - reducedTotal;
     const compressedObj = {};
     smallerList.forEach((key) => {
         if (key === null || key === 'null') {
@@ -38,7 +42,7 @@ const getPercentData = (data) => {
 };
 
 export default class StatCard extends React.Component {
-    constructor({data}) {
+    constructor({ data }) {
         super();
         this.state = {
             view: 1 //1: Count, 2: Expanded, 3: percent
@@ -46,7 +50,7 @@ export default class StatCard extends React.Component {
         // console.log('hello');
         this.expandedData = data;
         // console.log('expanded sorted: ', this.expandedData);
-        this.compressedData = compressData(this.expandedData);
+        this.compressedData = compressData(this.expandedData) || this.expandedData;
         // console.log('compressed sorted: ', this.compressedData);
         this.percentData = getPercentData(this.compressedData);
         this.toggleExpand = this.toggleExpand.bind(this);
@@ -74,9 +78,10 @@ export default class StatCard extends React.Component {
         } else if (this.state.view === 3) {
             activeData = this.percentData;
         }
+        console.log('SKINNY:',this.props.skinnyCard, this.props);
         return (
-            <div className="card">
-                <div className="card-content center-align">
+            <div className="card black-text col s4">
+                <div className="center-align">
                     <span className="card-title">{this.props.name}</span>
                     <div className="card-container">
                         <table className="bordered">

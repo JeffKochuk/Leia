@@ -107,7 +107,6 @@ table {
     overflow: auto !important;
 }
 
-<<<<<<< HEAD
 /* holds a bunch of cards */
 .stats-container {
     align-items: flex-start;
@@ -120,6 +119,7 @@ table {
     max-height: 35vh;
     min-width: 25vw;
     overflow: scroll;
+    padding: 0 1vw;
 }
 
 .tiny-button-inactive {
@@ -176,7 +176,7 @@ button:focus {
     color: white;
 }
 
-// Make the select dropdown's carat red
+// Make the select dropdown's caret red
 .caret {
     color: #C00 !important;
 }

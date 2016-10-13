@@ -89,23 +89,9 @@ export default class App extends Component {
             </div>
           </form>
         </div>
-        <div className="row center-align">
-          <div className="input-field col s4 right-align">
-            <p className="white-text"> Contacts: {this.state.total || ' - -'}</p>
-          </div>
-          <div className="input-field col s1 left-align">
-            {this.state.lastRefreshed ? <button onClick={this.toggleViewingDataRows} className="btn-floating WBRedBackground waves-effect waves-light white-text"><i className="material-icons">reorder</i></button> : null}
-          </div>
-          <div className="input-field col s4 right-align">
-            <p className="white-text"> Last Updated: {this.state.lastRefreshed ? this.state.lastRefreshed.toLocaleString() : ' - -'}</p>
-          </div>
-          <div className="input-field col s3 left-align">
-            {this.state.lastRefreshed ? <button onClick={this.refreshStats} className="btn-floating WBRedBackground waves-effect waves-light white-text"><i className="material-icons">autorenew</i></button> : null}
-          </div>
-        </div>
+        
         {this.state.loading ? <div className="progress"><div className="indeterminate"></div></div> : null}
-        {this.state.viewingDataRows ? <ContactList data={this.state.dataSample} name={this.state.name} /> : <StatsPlayground {...this.state.stats} /> }
-
+        <StatsPlayground {...this.state} />
       </div>
     );
   }

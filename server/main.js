@@ -2,6 +2,7 @@ import { Meteor } from 'meteor/meteor';
 import { getEloquaDataPromise, getEloquaDataResults, getOneEloquaPage, SEGMENTS_URL, CONTACTS_URL } from './getEloquaData.js';
 import { Segments, EloquaLogs, Logs } from '../imports/collections.js';
 import { Restivus } from 'meteor/nimble:restivus';
+import { accumulateStats } from '../imports/helpers/stats.js';
 
 // Take an Eloqua response and insert the elements into the Segments collection
 // Use with getEloquaResponse
@@ -113,13 +114,13 @@ Meteor.methods({
   getSegmentStats(segment) {
     const firstPage = getOneEloquaPage(segment['_id']).await();
     segment.total = firstPage.total;
-    segment.stats = accumulateStats(firstPage.elements, null);
+    segment.stats = accumulateStats(firstPage.elements, 'eloqua', null);
     if (firstPage.total > 1000) {
       
       const N = Math.ceil((firstPage.total - 1) / 1000);
       const promArray = [];
       for (let i = 2; i <= N; i++) {
-        promArray.push(getOneEloquaPage(segment['_id'], i).then((res) => accumulateStats(res.elements, segment.stats)));
+        promArray.push(getOneEloquaPage(segment['_id'], i).then((res) => accumulateStats(res.elements, 'eloqua', segment.stats)));
       }
       Promise.all(promArray).await();
     }
@@ -136,34 +137,7 @@ Meteor.methods({
 });
 
 
-const statsMap = new Map()
-    .set("C_Lead_Rating___Combined1", 'Lead Rating')
-    .set("C_Lead_Ranking1", 'Lead Ranking')
-    .set("C_Company", 'Company')
-    .set("C_Company_Size11", 'Company Size')
-    .set("C_Derived__Persona1", 'Persona')
-    .set("C_Industry1", 'Industry')
-    .set("C_Derived_Language_Preference1", 'Language')
-    .set("C_Country", 'Country');
-accumulateStats = (elements, stats) => {
-  // Initialize our array if nothing was passed
-  if (!stats) {
-    stats = {};
-    statsMap.forEach((val) => stats[val]={});
-  }
-  // Accumulate values of statsMap into stats;
-  for (const el of elements) {
-    statsMap.forEach((val, key) => {
-      // Mongo will be sad if we don't escape . and $ with alternate characters
-      if(el[key]){
-        el[key] = el[key].replace(/\./g, '\uff0e').replace(/\$/g, '\uff04');
-      }
-      // Set or increment the stats, where 'VAL' is the stat name and 'el[key]' is the stat value
-      stats[val][el[key]] = stats[val][el[key]] + 1 || 1;
-    });
-  }
-  return stats;
-};
+
 
 /////////////
 //
