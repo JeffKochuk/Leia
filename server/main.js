@@ -38,56 +38,6 @@ Meteor.startup(() => {
 //
 ////////////////
 Meteor.methods({
-  // Given a segment name,
-  // See if we have it in the record.
-  // If we do have it,
-  // See if we have updated it in the last day.
-  // If we have, return the cached copy from Contacts
-  // Otherwise, get the data from Eloqua and return that
-  // getContactsOfSegmentByName: name => {
-  //   const cursor = Segments.find({ name });
-  //   if (cursor.count() === 0) {
-  //     throw new Meteor.Error(`Could Not Find Segment Name: ${name}`);
-  //   }
-  //   const segment = cursor.fetch()[0];
-  //   if (segment.lastSearched && new Date() - segment.lastSearched < 1000*60*60*24){
-  //     console.log(`Segment ${name} was searched within a day: ${segment.lastSearched}`);
-  //     if(segment.cache){
-  //       Logs.insert({
-  //         type: 'Lookup',
-  //         input: name,
-  //         records: segment.cache.length,
-  //         date: new Date()
-  //       });
-  //       return segment.cache;
-  //     } else {
-  //       console.log('Last Searched was here but segment Cache was undefined');
-  //     }
-  //   }
-  //
-  //   const results = getEloquaDataResults(`${CONTACTS_URL}/${segment._id}`)
-  //     .catch((err) => console.log("You probably forgot to add the AUTHORIZATION environment variable or gave a bad URL:::\n" + err))
-  //     .await();
-  //   Logs.insert({
-  //     type: 'Lookup',
-  //     input: name,
-  //     records: results.length,
-  //     date: new Date()
-  //   });
-  //   const retArray = results.map(obj => ({
-  //     first: obj.C_FirstName,
-  //     last: obj.C_LastName,
-  //     email: obj.C_EmailAddress.replace(/.*@/, '***@'),
-  //   }));
-  //
-  //   Segments.update({ _id: segment._id },
-  //     { $set:
-  //       { lastSearched: new Date(),
-  //         cache: retArray
-  //       }
-  //     });
-  //   return retArray;
-  // },
 
   //Get a segment's contacts and accumulate stats
   getSegmentStatsByName(name) {

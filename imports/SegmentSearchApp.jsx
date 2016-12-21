@@ -1,27 +1,25 @@
 import React, { PropTypes, Component } from 'react';
-import ContactList from './ContactList.jsx';
 import { createContainer } from 'meteor/react-meteor-data';
 import { Meteor } from 'meteor/meteor';
-import { Session } from 'meteor/session';
 import { Bert } from 'meteor/themeteorchef:bert';
-import StatsPlayground from './stats/SpecificStatsPlayground.jsx'
+import StatsPlayground from './stats/StatsPlayground.jsx';
 
-export default class App extends Component {
+export default class SegmentSearchApp extends Component {
   constructor(props) {
     super(props);
     this.state = {
-    };
-    Session.set({ 
       loading: false,
-    });
+    };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.handleKey = this.handleKey.bind(this);
     this.toggleViewingDataRows = this.toggleViewingDataRows.bind(this);
+    this.refreshStats = this.refreshStats.bind(this);
   }
-  handleRefresh(e) {
-    Session.set({loading: true});
-    Meteor.call('getSegmentStats', {'_id': this.state['_id'], name: this.state.name}, function (err,result) {
-      Session.set({ loading: false });
+
+  refreshStats() {
+    this.setState({ loading: true });
+    Meteor.call('getSegmentStats', { name: this.state.name, _id: this.state._id }, function (err,result) {
+      this.setState({ loading: false });
       if (err) {
         console.log('ERROR: ' + err.error);
         Bert.alert(err.error, 'danger', 'growl-top-right');
@@ -30,23 +28,23 @@ export default class App extends Component {
       }
     }.bind(this));
   }
+
   handleSubmit(event) {
     event.preventDefault();
     const search = document.getElementById('segment-name-input').value.trim();
     if(search){
-      Session.set({
+      this.setState({
         loading: true,
       });
       console.log(`Searching Segments for ${search}`);
       Meteor.call('getSegmentStatsByName', search, function (err, result) {
-        Session.set({
+        this.setState({
           loading: false
         });
         if(err){
           console.log('ERROR: ' + err.error);
           Bert.alert(err.error, 'danger', 'growl-top-right');
         } else {
-          console.log(result);
           this.setState(result);
         }
       }.bind(this));
@@ -64,13 +62,12 @@ export default class App extends Component {
   }
 
   render() {
-    console.log(StatsPlayground);
     return (
       <div>
         <h4 className="white-text center-align">Who makes up your Eloqua segments?</h4>
-        <h3 className="WBRed center-align"> Ask Leia</h3>
-        <div className="row">
-          <form className="segmentSearch white-text container" onSubmit={this.handleSubmit} >
+        <h3 className="WBRed center-align">Ask Leia</h3>
+        <div className="row container">
+          <form className="segmentSearch white-text" onSubmit={this.handleSubmit} >
             <div className="input-field col s10 ">
               <input
               id="segment-name-input"
@@ -89,9 +86,10 @@ export default class App extends Component {
             </div>
           </form>
         </div>
-        
-        {this.state.loading ? <div className="progress"><div className="indeterminate"></div></div> : null}
-        <StatsPlayground {...this.state} />
+        <div className="container white-text">
+          {this.state.loading ? <div className="progress"><div className="indeterminate"></div></div> : null}
+          {this.state.stats ? <StatsPlayground {...this.state} refreshStats={this.refreshStats} /> : null}
+        </div>
       </div>
     );
   }

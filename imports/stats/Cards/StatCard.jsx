@@ -8,10 +8,11 @@ const compressData = (data) => {
     const sortedKeys = Object.keys(data)
         .filter((str) => str !== 'null' && str !== 'Other' && str !== 'N/A')
         .sort((a,b) => data[b] - data[a] );
+    if (!sortedKeys.length) return data;
     //Take out items with a lower count than the third highest number.
     const smallerList = sortedKeys.slice(0,3);
     // Calculate the sum of the removed values so we can mark them as 'Other'
-    const total = Object.values(data).reduce(reduceSum);
+    const total = Object.keys(data).map(a => data[a]).reduce(reduceSum);
     const reducedTotal = smallerList.map(a => data[a]).reduce(reduceSum);
     // delta is the number of removed entries for compressed data
     let delta = total - reducedTotal;
@@ -32,12 +33,13 @@ const compressData = (data) => {
     return null;
 };
 
-const getPercentData = (data) => {
-    const total = Object.values(data).reduce((a,b) => a + b, 0);
+const getPercentData = (data={}) => {
+    console.log(data);
+    const total = Object.values(data)
+        .reduce((a,b=0) => a + b, 0);
     const percentData = {};
-    Object.keys(data).forEach((key) => {
-        percentData[key] = `${Math.ceil((data[key] / total) * 100)}%`;
-    });
+    Object.keys(data)
+        .forEach((key) => {percentData[key] = `${Math.ceil((data[key] / total) * 100)}%`;});
     return percentData;
 };
 
@@ -88,9 +90,9 @@ export default class StatCard extends React.Component {
                             <tbody>
                             { Object.keys(activeData)
                                 .sort((a, b) => {
-                                    if (a == 'Other' || a === null || a === 'null') return 1;
-                                    if (b == 'Other' || b === null || b === 'null') return -1;
-                                    return parseInt(activeData[b]) - parseInt(activeData[a]);
+                                    if (!a || a == 'Other' || a === 'null') return 1;
+                                    if (!b || b == 'Other' || b === 'null') return -1;
+                                    return parseInt(activeData[b] || 0) - parseInt(activeData[a] || 0);
                                 })
                                 .map((entry, idx) => (
                                     <tr key={idx}>

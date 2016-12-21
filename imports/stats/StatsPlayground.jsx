@@ -5,6 +5,7 @@ import React from 'react';
 import StatCard from './Cards/StatCard.jsx';
 import ContactList from '../ContactList.jsx';
 import SpecificStatsPlayground from './SpecificStatsPlayground.jsx';
+import RankStats from './Cards/RankStats.jsx';
 
 // props:
 // {
@@ -13,6 +14,7 @@ import SpecificStatsPlayground from './SpecificStatsPlayground.jsx';
 //   dataSample: []
 // }
 export default function StatsPlayground (props) {
+    console.log('statsPlayground', props);
     const { Country, Language, ...rest } = props.stats;
     const mapData = { Country, Language };
     const rankData = {
@@ -26,14 +28,10 @@ export default function StatsPlayground (props) {
         'Industry': props.stats.Industry
     };
     const toggleViewingDataRows = () => {
-        // @todo implement this
+        // @todo implement this or verify if this is wanted
         console.log('SWITCH DATA ROWS');
     };
 
-    const refreshStats = () => {
-        // @todo implement this
-        console.log('SWITCH STATS');
-    };
     const showStatsCards = (props) => {
         console.log('Showing Stats',props);
         return (
@@ -50,19 +48,19 @@ export default function StatsPlayground (props) {
                     <p className="white-text"> Contacts: {props.total || ' - -'}</p>
                 </div>
                 <div className="input-field col s1 left-align">
-                    {props.dataSample ? <button onClick={toggleViewingDataRows} className="btn-floating WBRedBackground waves-effect waves-light white-text"><i className="material-icons">reorder</i></button> : null}
+                    {/* props.dataSample ? <button onClick={toggleViewingDataRows} className="btn-floating WBRedBackground waves-effect waves-light white-text"><i className="material-icons">reorder</i></button> : null */}
                 </div>
                 <div className="input-field col s4 right-align">
                     <p className="white-text"> Last Updated: {props.lastRefreshed ? props.lastRefreshed.toLocaleString() : ' - -'}</p>
                 </div>
                 <div className="input-field col s3 left-align">
-                    {props.lastRefreshed ? <button onClick={refreshStats} className="btn-floating WBRedBackground waves-effect waves-light white-text"><i className="material-icons">autorenew</i></button> : null}
+                    {props.lastRefreshed && props.refreshStats ? <button onClick={props.refreshStats} className="btn-floating WBRedBackground waves-effect waves-light white-text"><i className="material-icons">autorenew</i></button> : null}
                 </div>
             </div>
 
             <div className="divider"></div>
             <h4> Rank Data </h4>
-            {showStatsCards(rankData)}
+            <RankStats {...rankData} />
             <div className="divider"></div>
             <h4> Companies </h4>
             {showStatsCards(companyData)}
